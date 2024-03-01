@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 29, 2024 at 08:38 AM
--- Server version: 10.4.25-MariaDB
--- PHP Version: 7.4.30
+-- Generation Time: Mar 01, 2024 at 01:14 AM
+-- Server version: 10.4.24-MariaDB
+-- PHP Version: 7.4.29
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -41,13 +41,9 @@ CREATE TABLE `barang` (
 --
 
 INSERT INTO `barang` (`id_barang`, `nama_barang`, `kode_barang`, `harga`, `stok`, `tanggal`) VALUES
-(23, 'calvinklein', 'ck', 50000, 50, '2024-02-28'),
-(24, 'JKS', 'jojo', 900000, 90000, '2024-02-28'),
-(25, 'thomas', 'tm', 80000, 578, '2024-02-28'),
-(29, 'addidas', 'uk', 4599000, 6666666, '2024-02-29'),
-(30, 'shoppee', 'idn', 9000, 6666666, '2024-02-29'),
-(31, 'uniqlo', 'uniq', 9000000, 900, '2024-02-29'),
-(32, 'nuke', 'nuklir', 80000000, 0, '2024-02-29');
+(29, 'baju xxl', 'exe', 10000, 698, '2024-02-29'),
+(30, 'baju xl', 'exe', 30000, 0, '2024-02-29'),
+(31, 'baju m', 'exe', 50000, 6500, '2024-02-29');
 
 -- --------------------------------------------------------
 
@@ -74,9 +70,63 @@ INSERT INTO `barang_masuk` (`id_barang_masuk`, `id_barang`, `nama_supplier`, `ju
 (23, 28, 'richard', 7890, '2024-02-28'),
 (24, 26, 'gogogo', 345, '2024-02-28'),
 (25, 27, 'richard', 897645, '2024-02-28'),
-(26, 31, 'richard', 900, '2024-02-29'),
-(27, 29, 'richard', 6666666, '2024-02-29'),
-(28, 30, 'wop', 6666666, '2024-02-29');
+(26, 29, 'richard', 700, '2024-02-29'),
+(27, 31, 'richard', 6500, '2024-02-29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `keranjang`
+--
+
+CREATE TABLE `keranjang` (
+  `id_keranjang` int(4) NOT NULL,
+  `id_user` int(4) NOT NULL,
+  `keranjang` varchar(50) NOT NULL,
+  `pelanggan` varchar(60) NOT NULL,
+  `total_pesan` int(4) NOT NULL,
+  `harga` int(10) NOT NULL,
+  `kembalian` int(100) NOT NULL,
+  `tanggal` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `keranjang`
+--
+
+INSERT INTO `keranjang` (`id_keranjang`, `id_user`, `keranjang`, `pelanggan`, `total_pesan`, `harga`, `kembalian`, `tanggal`) VALUES
+(15, 0, 'baju xl', 'richard', 2, 60000, 0, '2024-02-29'),
+(16, 0, 'baju m', 'richard', 3, 150000, 0, '2024-02-29'),
+(17, 0, 'baju xl', 'ee', 3, 90000, 0, '2024-02-29'),
+(20, 0, 'baju xl', 'richard', 5, 150000, 0, '2024-02-29'),
+(21, 0, 'baju m', 'richaed', 4, 200000, 0, '2024-02-29'),
+(22, 0, 'baju xl', 'foco', 2, 60000, 10000, '2024-02-29'),
+(23, 0, 'baju xl', 'wewe', 3, 90000, 10000, '2024-02-29'),
+(24, 0, 'baju xxl', 'hohohohohohoho', 10, 100000, 20000, '2024-02-29'),
+(25, 0, 'baju xl', 'richard', 6, 180000, 20000, '2024-02-29'),
+(26, 0, 'baju xl', 'helepee', 5, 150000, 50000, '2024-02-29'),
+(27, 0, 'baju xxl', 'richard', 10, 1000000, 1000000, '2024-02-29'),
+(28, 0, 'baju xxl', 'rjrjr', 2, 60000, 0, '2024-02-29');
+
+--
+-- Triggers `keranjang`
+--
+DELIMITER $$
+CREATE TRIGGER `delete_stok_after_keranjang` AFTER DELETE ON `keranjang` FOR EACH ROW BEGIN
+    UPDATE barang
+    SET stok = stok + OLD.total_pesan
+    WHERE nama_barang = OLD.keranjang;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `update_stok_after_keranjang` AFTER INSERT ON `keranjang` FOR EACH ROW BEGIN
+    UPDATE barang
+    SET stok = stok - NEW.total_pesan
+    WHERE nama_barang = NEW.keranjang;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -98,10 +148,8 @@ CREATE TABLE `log` (
 
 CREATE TABLE `pembayaran` (
   `id_pembayaran` int(4) NOT NULL,
-  `id_barang` int(4) NOT NULL,
-  `keranjang` varchar(50) NOT NULL,
   `pelanggan` varchar(50) NOT NULL,
-  `total_pesan` int(50) NOT NULL,
+  `keranjang` varchar(50) NOT NULL,
   `harga` int(50) NOT NULL,
   `tanggal` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -110,29 +158,9 @@ CREATE TABLE `pembayaran` (
 -- Dumping data for table `pembayaran`
 --
 
-INSERT INTO `pembayaran` (`id_pembayaran`, `id_barang`, `keranjang`, `pelanggan`, `total_pesan`, `harga`, `tanggal`) VALUES
-(1, 0, 'mewmew', 'richard', 5, 445000, '2024-02-29'),
-(2, 0, 'calvinklein', 'richard', 5, 50000, '2024-02-29'),
-(3, 0, 'ororor', 'opsi', 67, 38048630, '2024-02-29'),
-(4, 0, 'calvinklein', 'richard', 6, 300000, '2024-02-29'),
-(5, 0, 'calvinklein', 'herlep', 5, 250000, '2024-02-29'),
-(6, 0, 'calvinklein', 'gritt', 5, 250000, '2024-02-29'),
-(7, 0, 'calvinklein', 'erererererer', 5, 0, '2024-02-29'),
-(8, 0, 'calvinklein', 'richard1', 67, 3350000, '2024-02-29'),
-(9, 0, 'calvinklein', 'oropopo', 5, 250000, '2024-02-29'),
-(10, 0, 'calvinklein', 'totkot', 5, 250000, '2024-02-29');
-
---
--- Triggers `pembayaran`
---
-DELIMITER $$
-CREATE TRIGGER `update_stock_trigger` AFTER INSERT ON `pembayaran` FOR EACH ROW BEGIN
-    UPDATE barang
-    SET stok = stok - total_pesan
-    WHERE id_barang = barang.id_barang;
-END
-$$
-DELIMITER ;
+INSERT INTO `pembayaran` (`id_pembayaran`, `pelanggan`, `keranjang`, `harga`, `tanggal`) VALUES
+(1, 'richard', '', 1000000, '2024-02-29'),
+(2, 'rjrjr', '', 60000, '2024-02-29');
 
 -- --------------------------------------------------------
 
@@ -183,6 +211,12 @@ ALTER TABLE `barang_masuk`
   ADD PRIMARY KEY (`id_barang_masuk`);
 
 --
+-- Indexes for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  ADD PRIMARY KEY (`id_keranjang`);
+
+--
 -- Indexes for table `log`
 --
 ALTER TABLE `log`
@@ -214,13 +248,19 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `barang`
 --
 ALTER TABLE `barang`
-  MODIFY `id_barang` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id_barang` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `barang_masuk`
 --
 ALTER TABLE `barang_masuk`
-  MODIFY `id_barang_masuk` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id_barang_masuk` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  MODIFY `id_keranjang` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `log`
@@ -232,7 +272,7 @@ ALTER TABLE `log`
 -- AUTO_INCREMENT for table `pembayaran`
 --
 ALTER TABLE `pembayaran`
-  MODIFY `id_pembayaran` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_pembayaran` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `transaksi`
